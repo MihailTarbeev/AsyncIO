@@ -1,26 +1,15 @@
-import time
-import threading
-import requests
+import asyncio
+from util import delay
 
 
-def read_example() -> None:
-    response = requests.get('https://www.example.com')
-    print(response.status_code)
+async def main():
+    delay_task = asyncio.create_task(delay(3))
+    try:
+        result = await asyncio.wait_for(delay_task, timeout=4)
+        print(result)
+    except asyncio.exceptions.TimeoutError:
+        print('Got a timeout!')
+    finally:
+        print(f'Was the task cancelled? {delay_task.cancelled()}')
 
-
-thread_1 = threading.Thread(target=read_example)
-thread_2 = threading.Thread(target=read_example)
-
-thread_start = time.time()
-
-thread_1.start()
-thread_2.start()
-
-print('All threads running!')
-
-thread_1.join()
-thread_2.join()
-
-thread_end = time.time()
-
-print(f'Running with threads took {thread_end - thread_start:.4f} seconds.')
+asyncio.run(main())
