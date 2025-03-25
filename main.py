@@ -1,15 +1,17 @@
 import asyncio
-from util import delay
+from util import async_timed
 
 
-async def main():
-    delay_task = asyncio.create_task(delay(3))
-    try:
-        result = await asyncio.wait_for(delay_task, timeout=4)
-        print(result)
-    except asyncio.exceptions.TimeoutError:
-        print('Got a timeout!')
-    finally:
-        print(f'Was the task cancelled? {delay_task.cancelled()}')
+@async_timed()
+async def cpu_bound_work() -> int:
+    counter = 0
+    for i in range(100000000):
+        counter = counter + 1
+    return counter
 
-asyncio.run(main())
+
+async def main() -> None:
+    task_one = asyncio.create_task(cpu_bound_work())
+    await task_one
+
+asyncio.run(main(), debug=True)
